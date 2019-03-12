@@ -157,6 +157,9 @@ architecture rtl of top is
   signal dir_blue            : std_logic_vector(7 downto 0);
   signal dir_pixel_column    : std_logic_vector(10 downto 0);
   signal dir_pixel_row       : std_logic_vector(10 downto 0);
+  
+  signal cnt                 : std_logic_vector(24 downto 0);
+  signal offset              : std_logic_vector(10 downto 0);
 
 begin
 
@@ -289,26 +292,47 @@ begin
   
 	process(pix_clock_s) begin
 		if rising_edge(pix_clock_s) then
-			char_address <= char_address + 1;
+			if(char_address = 1199) then
+				char_address <= (others => '0');
+			else
+				char_address <= char_address + 1;
+			end if;
 		end if;
 	end process;
 	
-	char_value <= "001000" when char_address = 2334 else --H 8 
-					  "000101" when char_address = 2335 else --E 5
-					  "001100" when char_address = 2336 else --L 12
-					  "001100" when char_address = 2337 else --L 12
-					  "001111" when char_address = 2338 else --O 15
-					  "100000" when char_address = 2339 else --space 32
-					  "010111" when char_address = 2340 else --W 23
-					  "001111" when char_address = 2341 else --O 15
-					  "010010" when char_address = 2342 else --R 18
-					  "001100" when char_address = 2343 else --L 12
-					  "000100" when char_address = 2344 else --D 4
-					  "100000";                              --space 32
+	process(pix_clock_s) begin
+		if rising_edge(pix_clock_s) then
+			if (cnt = 1562499) then
+				cnt <= (others => '0');
+				if (offset = 1109) then
+					offset <= (others => '0');
+				else
+					offset <= offset + 1;
+				end if;
+			else
+				cnt <= cnt + 1;
+			end if;
+		end if;
+	end process;
+	
+	char_value <= "001000" when char_address = 40 + offset else --H 8 
+					  "000101" when char_address = 41 + offset else --E 5
+					  "001100" when char_address = 42 + offset else --L 12
+					  "001100" when char_address = 43 + offset else --L 12
+					  "001111" when char_address = 44 + offset else --O 15
+					  "100000" when char_address = 45 + offset else --space 32
+					  "010111" when char_address = 46 + offset else --W 23
+					  "001111" when char_address = 47 + offset else --O 15
+					  "010010" when char_address = 48 + offset else --R 18
+					  "001100" when char_address = 49 + offset else --L 12
+					  "000100" when char_address = 50 + offset else --D 4
+					  "100000";                                     --space 32
   
   -- koristeci signale realizovati logiku koja pise po GRAPH_MEM
   --pixel_address
   --pixel_value
   --pixel_we
+ 
+ 
   
 end rtl;
