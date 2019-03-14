@@ -158,7 +158,7 @@ architecture rtl of top is
   signal dir_pixel_column    : std_logic_vector(10 downto 0);
   signal dir_pixel_row       : std_logic_vector(10 downto 0);
   
-  signal cnt                 : std_logic_vector(24 downto 0);
+  signal cnt                 : std_logic_vector(20 downto 0);
   signal offset              : std_logic_vector(10 downto 0);
 
 begin
@@ -302,7 +302,7 @@ begin
 	
 	process(pix_clock_s) begin
 		if rising_edge(pix_clock_s) then
-			if (cnt = 1562499) then
+			if (cnt = 12499999) then
 				cnt <= (others => '0');
 				if (offset = 1109) then
 					offset <= (others => '0');
@@ -333,6 +333,27 @@ begin
   --pixel_value
   --pixel_we
  
- 
+	pixel_we <= '1';
+
+	process(pix_clock_s) begin
+		if rising_edge(pix_clock_s) then
+			if (pixel_address <= 9600) then
+				pixel_address <= (others => '0');
+			else
+				pixel_address <= pixel_address + 1;
+		end if;
+	end process;
+	
+	pixel_col <= (others => '0') when pixel_col = 20 else
+                 pixel_col + 1  when cnt = 12499999 else
+					  pixel_col
+					  
+	pixel_row <= (others => '0') when pixel_row = 9600 else
+                 pixel_row + 20 when pixel_col = 20   else
+					  pixel_row;
+	
+	pixel_value <= X"00000000" when (pixel_address >= (pixel_row + pixel_col) and pixel_address <= (pixel_row + pixel_col + 620)) and (pixel_address[4 downto 0] && pixel_col) else
+	               X"00000000" when (pixel_address >= (pixel_row + pixel_col + 1) and pixel_address <= (pixel_row + pixel_col + 1 + 620)) and (pixel_address[4 downto 0] && (pixel_col+1)) else
+                  x"ffffffff";
   
 end rtl;
