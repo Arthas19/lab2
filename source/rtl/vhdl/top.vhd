@@ -160,6 +160,9 @@ architecture rtl of top is
   
   signal cnt                 : std_logic_vector(20 downto 0);
   signal offset              : std_logic_vector(10 downto 0);
+  
+  signal pixel_row_s         : std_logic_vector(13 downto 0);
+  signal pixel_col_s         : std_logic_vector(13 downto 0);
 
 begin
 
@@ -173,7 +176,7 @@ begin
   
   -- removed to inputs pin
   direct_mode <= '0';
-  display_mode     <= "01";  -- 01 - text mode, 10 - graphics mode, 11 - text & graphics
+  display_mode     <= "10";  -- 01 - text mode, 10 - graphics mode, 11 - text & graphics
   
   font_size        <= x"1";
   show_frame       <= '1';
@@ -334,26 +337,68 @@ begin
   --pixel_we
  
 	pixel_we <= '1';
-
+	
 	process(pix_clock_s) begin
 		if rising_edge(pix_clock_s) then
-			if (pixel_address <= 9600) then
+			if (pixel_address = 9600) then
 				pixel_address <= (others => '0');
 			else
 				pixel_address <= pixel_address + 1;
+			end if;
 		end if;
 	end process;
 	
-	pixel_col <= (others => '0') when pixel_col = 20 else
-                 pixel_col + 1  when cnt = 12499999 else
-					  pixel_col
-					  
-	pixel_row <= (others => '0') when pixel_row = 9600 else
-                 pixel_row + 20 when pixel_col = 20   else
-					  pixel_row;
+	process(pix_clock_s, cnt) begin
+		if rising_edge(pix_clock_s) then
+			if(cnt = 12499999) then
+				if(pixel_col_s = 20) then
+					pixel_col_s <= (others => '0');
+				else
+					pixel_row_s <= pixel_col_s + 1;
+					pixel_row_s <= pixel_row_s;
+				end if;
+			else
+				pixel_col_s <= pixel_col_s;
+				pixel_row_s <= pixel_row_s;
+			end if;
+		end if;
+	end process;
 	
-	pixel_value <= X"00000000" when (pixel_address >= (pixel_row + pixel_col) and pixel_address <= (pixel_row + pixel_col + 620)) and (pixel_address[4 downto 0] && pixel_col) else
-	               X"00000000" when (pixel_address >= (pixel_row + pixel_col + 1) and pixel_address <= (pixel_row + pixel_col + 1 + 620)) and (pixel_address[4 downto 0] && (pixel_col+1)) else
-                  x"ffffffff";
+--	pixel_row_s <= (others => '0');
+--	pixel_col_s <= (others => '0');
+	
+	pixel_value <= X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s)       else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 20)  else
+						X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 40)  else
+						X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 60)  else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 80)  else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 100) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 120) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 140) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 160) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 180) else
+						X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 200) else
+						X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 220) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 240) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 260) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 280) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 300) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 320) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 340) else
+						X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 360) else
+						X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 380) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 400) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 420) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 440) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 460) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 480) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 500) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 520) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 540) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 560) else
+                  X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 580) else
+						X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 600) else
+						X"ffffffff" when pixel_address = (pixel_row_s + pixel_col_s + 620) else
+                  X"00000000";
   
 end rtl;
